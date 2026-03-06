@@ -1,5 +1,7 @@
 package com.tixeon.simplewebcrawler.di
 
+import com.tixeon.simplewebcrawler.data.remote.api.restaurants.NearbyRestaurantApi
+import com.tixeon.simplewebcrawler.data.remote.api.restaurants.NearbyRestaurantsApiImplementation
 import com.tixeon.simplewebcrawler.utils.AppDispatchers
 import dagger.Module
 import dagger.Provides
@@ -20,4 +22,10 @@ object AppModule {
         override fun main(): CoroutineDispatcher = Dispatchers.Main
         override fun default(): CoroutineDispatcher = Dispatchers.Default
     }
+
+    @Provides
+    @Singleton
+    fun providesNearbyRestaurantsApi(
+        impl: NearbyRestaurantsApiImplementation
+    ): NearbyRestaurantApi = impl
 }

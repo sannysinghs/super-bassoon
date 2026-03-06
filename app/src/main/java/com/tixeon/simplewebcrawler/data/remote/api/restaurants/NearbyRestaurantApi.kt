@@ -1,9 +1,11 @@
 package com.tixeon.simplewebcrawler.data.remote.api.restaurants
 
+import android.util.Log
 import com.google.gson.Gson
 import com.tixeon.simplewebcrawler.data.remote.model.restaurants.NearbyRestaurantResult
 import com.tixeon.simplewebcrawler.data.remote.model.restaurants.Restaurant
 import com.tixeon.simplewebcrawler.data.remote.model.restaurants.UserRating
+import com.tixeon.simplewebcrawler.utils.AppDispatchers
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.json.JSONException
@@ -12,6 +14,8 @@ import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.net.HttpURLConnection
 import java.net.URL
+import java.util.logging.Logger
+import javax.inject.Inject
 
 interface NearbyRestaurantApi {
     suspend fun fetchRestaurants(page: Int): NearbyRestaurantResult
@@ -22,10 +26,12 @@ private const val MAX_READ_TIMEOUT = 10000
 private const val MAX_CONNECTION_TIMEOUT = 10000
 private const val JSON_KEY_DATA = "data"
 private const val JSON_KEY_PAGE = "page"
-private const val JSON_KEY_TOTAL_PAGES = "total-pages"
+private const val JSON_KEY_TOTAL_PAGES = "total_pages"
 
-class NearbyRestaurantsApiImplementation: NearbyRestaurantApi {
-    override suspend fun fetchRestaurants(page: Int): NearbyRestaurantResult = withContext(Dispatchers.IO) {
+class NearbyRestaurantsApiImplementation @Inject constructor(
+    private val dispatchers: AppDispatchers,
+) : NearbyRestaurantApi {
+    override suspend fun fetchRestaurants(page: Int): NearbyRestaurantResult = withContext(dispatchers.io()) {
         val url = URL("$BASE_URL_NEARBY_RESTAURANTS?page=$page")
 
         val connection = url.openConnection() as HttpURLConnection
@@ -37,6 +43,7 @@ class NearbyRestaurantsApiImplementation: NearbyRestaurantApi {
             addRequestProperty("Content-Type", "application/json;charset=UTF-8")
         }
 
+        Log.d("NearbyRestaurantsApi", "Request: fetchRestaurants: $url")
         if (connection.responseCode != HttpURLConnection.HTTP_OK)
             throw Exception("Http Error: ${connection.responseCode} ${connection.responseMessage}")
 
@@ -47,6 +54,8 @@ class NearbyRestaurantsApiImplementation: NearbyRestaurantApi {
                 jsonRes.append(res)
             }
         }
+
+        Log.d("NearbyRestaurantsApi", "Response: fetchRestaurants: $jsonRes")
 
         val jsonObject = JSONObject(jsonRes.toString())
 

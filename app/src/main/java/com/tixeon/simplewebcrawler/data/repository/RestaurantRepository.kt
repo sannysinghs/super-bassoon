@@ -1,8 +1,7 @@
 package com.tixeon.simplewebcrawler.data.repository
 
-import com.tixeon.simplewebcrawler.data.remote.api.movies.MovieApi
-import com.tixeon.simplewebcrawler.data.remote.model.movies.MovieResult
-import com.tixeon.simplewebcrawler.domain.repository.MovieRepository
+import com.tixeon.simplewebcrawler.data.remote.api.restaurants.NearbyRestaurantApi
+import com.tixeon.simplewebcrawler.data.remote.model.restaurants.NearbyRestaurantResult
 import com.tixeon.simplewebcrawler.utils.AppDispatchers
 import com.tixeon.simplewebcrawler.utils.Resource
 import kotlinx.coroutines.withContext
@@ -10,16 +9,18 @@ import retrofit2.HttpException
 import java.io.IOException
 import javax.inject.Inject
 
-class MovieRepositoryImpl @Inject constructor(
-    private val movieApi: MovieApi,
-    private val dispatcher: AppDispatchers
-) : MovieRepository {
 
-    override suspend fun getSimilarMovies(movieId: Int): Resource<MovieResult> {
+class RestaurantRepository @Inject constructor(
+    private val api: NearbyRestaurantApi,
+    private val dispatchers: AppDispatchers,
+) {
+    suspend fun getRestaurants(
+        page: Int,
+    ): Resource<NearbyRestaurantResult> {
         return try {
             Resource.Success(
-                withContext(dispatcher.io()) {
-                    movieApi.getSimilarMovies(movieId)
+                withContext(dispatchers.io()) {
+                    api.fetchRestaurants(page)
                 }
             )
         } catch (e: Exception) {
